@@ -1,0 +1,14 @@
+{
+  "name": "helpdesk-ex00",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "dev:api": "tsx api/src/index.ts",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx api/src/db/seed.ts"
+  }
+}

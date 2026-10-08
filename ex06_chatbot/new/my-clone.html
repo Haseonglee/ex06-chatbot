@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>마이카마켓 · 중고차 매물</title>
+<style>
+  :root {
+    --bg: #f4f6fb; --card: #fff; --text: #14213d; --sub: #667085; --line: #e4e8f1;
+    --brand: #2b4bff; --brand-soft: #e9edff; --ok: #12a150; --danger: #d92d20; --dark: #0f1b3d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0e1220; --card: #171d30; --text: #eef1fb; --sub: #98a2b8; --line: #283050; --brand: #6c85ff; --brand-soft: #1f2a55; --ok: #3ccb7f; --danger: #ff7a70; --dark: #0a0e1a; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif; line-height: 1.5; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+  button { font: inherit; cursor: pointer; border-radius: 999px; border: 1px solid var(--line); background: var(--card); color: var(--text); padding: 8px 16px; transition: .15s; }
+  button:hover { border-color: var(--brand); color: var(--brand); }
+  button.primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 700; }
+  button.primary:hover { filter: brightness(1.1); color: #fff; }
+  button.active { background: var(--dark); border-color: var(--dark); color: #fff; }
+  button:focus-visible, .card:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .tabcnt { opacity: .7; font-size: 12.5px; margin-left: 4px; }
+
+  /* 헤더 */
+  header { background: var(--card); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
+  .bar { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .logo { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 20px; cursor: pointer; }
+  .logo i { width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(135deg, var(--brand), #8a5bff); display: inline-block; position: relative; }
+  .logo i::after { content: ""; position: absolute; left: 6px; right: 6px; top: 11px; height: 7px; border-radius: 4px 4px 2px 2px; background: #fff; }
+  nav { display: flex; gap: 20px; color: var(--sub); font-size: 15px; }
+  nav span { cursor: default; }
+  nav span.on { color: var(--text); font-weight: 700; }
+  @media (max-width: 720px) { nav { display: none; } }
+
+  /* 히어로 */
+  .hero { background: linear-gradient(120deg, var(--dark), #1b2f7a); color: #fff; padding: 28px 0; }
+  .hero h1 { margin: 0 0 4px; font-size: 26px; }
+  .hero p { margin: 0; opacity: .8; }
+
+  main { padding: 20px 0 56px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .group .lbl { color: var(--sub); font-size: 13px; margin-right: 4px; }
+  .count { font-size: 18px; font-weight: 800; margin: 12px 0 14px; }
+  .count span { color: var(--brand); }
+
+  /* 카드 */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  @media (max-width: 960px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; cursor: pointer; transition: box-shadow .2s, transform .2s; }
+  .card:hover { box-shadow: 0 10px 28px rgba(20,33,61,.14); transform: translateY(-3px); }
+  .card.sold { opacity: .55; }
+  .card.sold .price { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .thumb { position: relative; aspect-ratio: 16/10; background: var(--line); overflow: hidden; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badge { position: absolute; top: 12px; left: 12px; padding: 3px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--ok); color: #fff; }
+  .badge.sold { background: #475066; }
+  .soldmask { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(15,27,61,.45); color: #fff; font-weight: 800; font-size: 20px; letter-spacing: 2px; }
+  .cnt { position: absolute; right: 12px; bottom: 12px; background: rgba(15,27,61,.75); color: #fff; font-size: 12px; padding: 2px 10px; border-radius: 999px; }
+  .body { padding: 14px 16px 16px; }
+  .title { font-weight: 700; font-size: 17px; margin: 0 0 8px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .tag { font-size: 12.5px; color: var(--sub); background: var(--bg); padding: 3px 10px; border-radius: 8px; }
+  .price { font-size: 22px; font-weight: 800; }
+  .price small { font-size: 14px; font-weight: 600; color: var(--sub); }
+  .empty { grid-column: 1 / -1; text-align: center; color: var(--sub); padding: 72px 0; }
+
+  /* 상세 */
+  .back { margin-bottom: 14px; }
+  .detail { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+  @media (max-width: 860px) { .detail { grid-template-columns: 1fr; } }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  .panel + .panel { margin-top: 16px; }
+  .hero-img { border-radius: 12px; overflow: hidden; aspect-ratio: 16/10; position: relative; }
+  .hero-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .side { position: sticky; top: 80px; }
+  .side h2 { margin: 0 0 4px; font-size: 22px; }
+  .side .price { font-size: 32px; margin: 10px 0 14px; }
+  .side .tags { margin-bottom: 14px; }
+  .contact { background: var(--brand-soft); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-bottom: 12px; }
+  .contact b { display: block; font-size: 12px; color: var(--sub); font-weight: 500; }
+  .side button { width: 100%; padding: 12px; }
+  h3 { margin: 0 0 10px; font-size: 17px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 0; border-bottom: 1px solid var(--line); }
+  th { color: var(--sub); font-weight: 500; width: 110px; }
+  ul.plain { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font-size: 13.5px; background: var(--brand-soft); color: var(--brand); padding: 4px 12px; border-radius: 999px; }
+
+  /* 등록 폼 */
+  .formbox { max-width: 560px; }
+  .field { margin-bottom: 16px; }
+  label { display: block; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  input[type=text], input[type=file] { width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); color: var(--text); font: inherit; }
+  input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  input.invalid { border-color: var(--danger); }
+  .err { color: var(--danger); font-size: 13px; margin: 5px 0 0; }
+  .preview { display: none; margin-top: 10px; max-width: 280px; border-radius: 12px; }
+  .hint { color: var(--sub); font-size: 13px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <div class="logo" id="logo"><i></i>마이카마켓</div>
+    <nav><span class="on" id="navBuy" style="cursor:pointer">중고차 구매</span><span id="navSell" style="cursor:pointer">내 차 팔기</span></nav>
+    <button class="primary" id="btnNew">+ 매물 등록</button>
+  </div>
+</header>
+
+<div class="hero" id="hero">
+  <div class="wrap">
+    <h1>내게 맞는 중고차를 한눈에</h1>
+    <p>정렬 기준을 바꿔 보고, 마음에 드는 차를 눌러 상세 정보를 확인하세요.</p>
+  </div>
+</div>
+
+<main class="wrap">
+  <!-- 목록 -->
+  <section id="viewList">
+    <div class="controls">
+      <div class="group" id="tabs" aria-label="판매 상태">
+        <button data-filter="all" class="active">전체</button>
+        <button data-filter="selling">판매중</button>
+        <button data-filter="sold">판매완료</button>
+      </div>
+      <div class="group" id="sorts" aria-label="정렬">
+        <span class="lbl">정렬</span>
+        <button data-sort="latest" class="active">최신 등록순</button>
+        <button data-sort="price">낮은 가격순</button>
+        <button data-sort="mileage">짧은 주행거리순</button>
+        <button data-sort="year">최신 연식순</button>
+      </div>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- 상세 -->
+  <section id="viewDetail" hidden></section>
+
+  <!-- 등록 -->
+  <section id="viewForm" hidden>
+    <div class="back"><button id="formBack">← 목록으로</button></div>
+    <div class="panel formbox">
+      <h3 style="font-size:22px">매물 등록</h3>
+      <form id="form" novalidate>
+        <div class="field"><label for="fName">차명</label>
+          <input type="text" id="fName" placeholder="예: 현대 그랜저 IG"><p class="err" id="eName"></p></div>
+        <div class="field"><label for="fPrice">가격 (만원)</label>
+          <input type="text" id="fPrice" inputmode="numeric" placeholder="예: 2350"><p class="err" id="ePrice"></p></div>
+        <div class="field"><label for="fYear">연식 (년)</label>
+          <input type="text" id="fYear" inputmode="numeric" placeholder="예: 2020"><p class="err" id="eYear"></p></div>
+        <div class="field"><label for="fMileage">주행거리 (km)</label>
+          <input type="text" id="fMileage" inputmode="numeric" placeholder="예: 45000"><p class="err" id="eMileage"></p></div>
+        <div class="field"><label for="fPhoto">사진</label>
+          <input type="file" id="fPhoto" accept="image/*"><p class="err" id="ePhoto"></p>
+          <img class="preview" id="preview" alt="선택한 사진 미리보기"></div>
+        <button type="submit" class="primary">등록</button>
+        <p class="hint">데이터는 메모리에만 저장되어 새로고침하면 처음 상태로 돌아감.</p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<script>
+// ===== 더미 데이터 (메모리) =====
+function placeholder(c1, c2, label) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+    <rect width="640" height="400" fill="url(#g)"/>
+    <g fill="rgba(255,255,255,.92)">
+      <path d="M110 262l44-92c8-17 22-26 42-26h232c20 0 34 8 46 22l56 74c14 3 24 14 24 28v32h-44a48 48 0 0 0-96 0H278a48 48 0 0 0-96 0h-72z"/>
+      <circle cx="230" cy="322" r="32"/><circle cx="426" cy="322" r="32"/>
+    </g>
+    <text x="320" y="380" font-size="22" text-anchor="middle" fill="rgba(255,255,255,.85)" font-family="sans-serif">${label}</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+let nextId = 9;
+const cars = [
+  { name: '현대 그랜저 IG 2.5', price: 2350, year: 2019, mileage: 58000, status: 'selling', photo: placeholder('#4b6a8a', '#2b3a52', '그랜저'),
+    spec: { 배기량: '2,497cc', 변속기: '자동', 연비: '11.2km/l', 색상: '화이트', 차종: '대형' },
+    history: ['사고 이력 없음', '2023.04 엔진오일·필터 교환', '2024.08 브레이크 패드 교체'],
+    options: ['내비게이션', '후방카메라', '열선시트', '통풍시트', '선루프'], contact: '김판매 딜러 010-1111-2222' },
+  { name: '기아 K5 3세대', price: 2090, year: 2021, mileage: 32000, status: 'selling', photo: placeholder('#8a4b5b', '#4a2630', 'K5'),
+    spec: { 배기량: '1,999cc', 변속기: '자동', 연비: '12.8km/l', 색상: '블랙', 차종: '중형' },
+    history: ['경미한 접촉 사고 1회(범퍼 교환)', '2024.02 타이어 4본 교체'],
+    options: ['스마트크루즈', '차선유지', '열선핸들', '전동트렁크'], contact: '박개인 010-2222-3333' },
+  { name: '제네시스 G80', price: 4480, year: 2020, mileage: 41000, status: 'sold', photo: placeholder('#44505f', '#1d242e', 'G80'),
+    spec: { 배기량: '2,497cc', 변속기: '자동', 연비: '9.8km/l', 색상: '그레이', 차종: '대형' },
+    history: ['사고 이력 없음', '2024.06 정기점검 완료'],
+    options: ['HUD', '서라운드뷰', '나파가죽시트', '전동커튼'], contact: '이딜러 010-3333-4444' },
+  { name: '현대 아반떼 CN7', price: 1690, year: 2022, mileage: 18000, status: 'selling', photo: placeholder('#3f8f6d', '#1f4d3a', '아반떼'),
+    spec: { 배기량: '1,598cc', 변속기: '자동', 연비: '14.5km/l', 색상: '실버', 차종: '준중형' },
+    history: ['사고 이력 없음', '무교체 신차급'],
+    options: ['후측방경고', '블루링크', '무선충전'], contact: '최개인 010-4444-5555' },
+  { name: '기아 쏘렌토 4세대', price: 3150, year: 2021, mileage: 67000, status: 'selling', photo: placeholder('#9a7a3b', '#5a431b', '쏘렌토'),
+    spec: { 배기량: '2,151cc', 변속기: '자동', 연비: '13.0km/l', 색상: '브라운', 차종: 'SUV' },
+    history: ['사고 이력 없음', '2024.10 미션오일 교환', '2025.03 에어컨 필터 교환'],
+    options: ['파노라마 선루프', '전방카메라', '3열시트'], contact: '정딜러 010-5555-6666' },
+  { name: '쌍용 티볼리 에어', price: 1250, year: 2018, mileage: 98000, status: 'sold', photo: placeholder('#6b5b9a', '#3a2f5a', '티볼리'),
+    spec: { 배기량: '1,597cc', 변속기: '자동', 연비: '11.5km/l', 색상: '화이트', 차종: 'SUV' },
+    history: ['접촉 사고 2회(도어·펜더 판금)', '2023.11 배터리 교체'],
+    options: ['후방센서', '블루투스'], contact: '한개인 010-6666-7777' },
+  { name: '현대 쏘나타 DN8', price: 2180, year: 2020, mileage: 49000, status: 'selling', photo: placeholder('#3b7a9a', '#1b445a', '쏘나타'),
+    spec: { 배기량: '1,999cc', 변속기: '자동', 연비: '12.5km/l', 색상: '블루', 차종: '중형' },
+    history: ['사고 이력 없음', '2024.05 엔진오일 교환'],
+    options: ['디지털키', '빌트인캠', '열선시트'], contact: '오딜러 010-7777-8888' },
+  { name: '기아 모닝 어반', price: 890, year: 2019, mileage: 72000, status: 'selling', photo: placeholder('#b05a8a', '#6a2f52', '모닝'),
+    spec: { 배기량: '998cc', 변속기: '자동', 연비: '15.0km/l', 색상: '핑크', 차종: '경차' },
+    history: ['사고 이력 없음', '2023.09 타이어 교체'],
+    options: ['후방카메라', '스마트키'], contact: '윤개인 010-8888-9999' },
+].map((c, i) => ({ ...c, id: i + 1, registeredAt: i + 1 })); // registeredAt이 클수록 최근 등록
+
+const state = { filter: 'all', sort: 'latest' };
+const $ = (id) => document.getElementById(id);
+const won = (n) => n.toLocaleString('ko-KR');
+const esc = (s) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+const sorters = {
+  latest: (a, b) => b.registeredAt - a.registeredAt,
+  price: (a, b) => a.price - b.price,
+  mileage: (a, b) => a.mileage - b.mileage,
+  year: (a, b) => b.year - a.year,
+};
+
+function show(view) {
+  for (const id of ['viewList', 'viewDetail', 'viewForm']) $(id).hidden = id !== view;
+  $('hero').hidden = view !== 'viewList';
+  window.scrollTo(0, 0);
+}
+
+// 카드·상세에서 같이 쓰는 사양 태그 줄
+function tagsOf(c) {
+  const t = [`${c.year}년식`, `${won(c.mileage)}km`];
+  if (c.spec.변속기 && c.spec.변속기 !== '정보 없음') t.push(c.spec.변속기);
+  if (c.spec.차종 && c.spec.차종 !== '정보 없음') t.push(c.spec.차종);
+  return t.map((x) => `<span class="tag">${esc(x)}</span>`).join('');
+}
+
+// ===== 목록 =====
+function renderList() {
+  const label = { all: '전체', selling: '판매중', sold: '판매완료' };
+  document.querySelectorAll('#tabs button').forEach((b) => {
+    const f = b.dataset.filter, on = f === state.filter;
+    const n = cars.filter((c) => f === 'all' || c.status === f).length;
+    b.innerHTML = `${label[f]}<span class="tabcnt">${n}</span>`;
+    b.classList.toggle('active', on); b.setAttribute('aria-pressed', on);
+  });
+  document.querySelectorAll('#sorts button').forEach((b) => {
+    const on = b.dataset.sort === state.sort;
+    b.classList.toggle('active', on); b.setAttribute('aria-pressed', on);
+  });
+  const list = cars.filter((c) => state.filter === 'all' || c.status === state.filter).sort(sorters[state.sort]);
+
+  $('count').innerHTML = `<span>${list.length}</span>대의 중고차`;
+  if (!list.length) { $('grid').innerHTML = `<div class="empty">${state.filter === 'sold' ? '판매완료된 매물이 없음' : '조건에 맞는 매물이 없음'}</div>`; return; }
+  $('grid').innerHTML = list.map((c) => {
+    const sold = c.status === 'sold';
+    return `<article class="card ${sold ? 'sold' : ''}" data-id="${c.id}" tabindex="0" role="link" aria-label="${esc(c.name)} ${won(c.price)}만원 ${sold ? '판매완료' : '판매중'}">
+      <div class="thumb"><img src="${c.photo}" alt="${esc(c.name)}" loading="lazy">
+        <span class="badge ${sold ? 'sold' : ''}">${sold ? '판매완료' : '판매중'}</span>${sold ? '<div class="soldmask">판매완료</div>' : ''}</div>
+      <div class="body">
+        <p class="title">${esc(c.name)}</p>
+        <div class="price">${won(c.price)}<small> 만원</small></div>
+        <div class="tags" style="margin:8px 0 0">${tagsOf(c)}</div>
+      </div></article>`;
+  }).join('');
+}
+
+// ===== 상세 =====
+function renderDetail(id) {
+  const c = cars.find((x) => x.id === id); if (!c) return;
+  const sold = c.status === 'sold';
+  const rows = Object.entries(c.spec).map(([k, v]) => `<tr><th>${esc(k)}</th><td>${esc(v)}</td></tr>`).join('');
+  const hist = c.history.map((h) => `<li>${esc(h)}</li>`).join('');
+  const opts = c.options.length ? c.options.map((o) => `<span class="chip">${esc(o)}</span>`).join('') : '<span class="hint">등록된 옵션 없음</span>';
+
+  $('viewDetail').innerHTML = `
+    <div class="back"><button id="detailBack">← 목록으로</button></div>
+    <div class="detail">
+      <div>
+        <div class="panel"><div class="hero-img"><img src="${c.photo}" alt="${esc(c.name)}">
+          <span class="badge ${sold ? 'sold' : ''}">${sold ? '판매완료' : '판매중'}</span>${sold ? '<div class="soldmask">판매완료</div>' : ''}</div></div>
+        <div class="panel"><h3>기본 스펙</h3><table>${rows}</table></div>
+        <div class="panel"><h3>사고 / 정비 이력</h3><ul class="plain">${hist}</ul></div>
+        <div class="panel"><h3>옵션</h3><div class="chips">${opts}</div></div>
+      </div>
+      <aside class="side panel">
+        <h2>${esc(c.name)}</h2>
+        <div class="tags">${tagsOf(c)}</div>
+        <div class="price">${won(c.price)}<small> 만원</small></div>
+        <div class="contact"><b>판매자 연락처</b>${esc(c.contact)}</div>
+        ${sold ? '<button disabled>판매가 완료된 매물임</button>' : '<button class="primary" id="markSold">판매완료로 변경</button>'}
+      </aside>
+    </div>`;
+  show('viewDetail');
+  $('detailBack').onclick = () => { renderList(); show('viewList'); };
+  const b = $('markSold'); if (b) b.onclick = () => { c.status = 'sold'; renderDetail(c.id); };
+}
+
+// ===== 목록 이벤트 =====
+$('tabs').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { state.filter = b.dataset.filter; renderList(); } });
+$('sorts').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) { state.sort = b.dataset.sort; renderList(); } });
+$('grid').addEventListener('click', (e) => { const c = e.target.closest('.card'); if (c) renderDetail(Number(c.dataset.id)); });
+$('grid').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const c = e.target.closest('.card'); if (c) renderDetail(Number(c.dataset.id)); } });
+$('logo').onclick = () => { renderList(); show('viewList'); };
+$('navBuy').onclick = $('logo').onclick;
+$('navSell').onclick = () => $('btnNew').click();
+
+// ===== 등록 폼 =====
+let photoData = '';
+const fields = ['Name', 'Price', 'Year', 'Mileage', 'Photo'];
+function resetForm() {
+  $('form').reset(); photoData = '';
+  $('preview').style.display = 'none'; $('preview').removeAttribute('src');
+  fields.forEach((f) => { $('e' + f).textContent = ''; const i = $('f' + f); if (i) i.classList.remove('invalid'); });
+}
+$('btnNew').onclick = () => { resetForm(); show('viewForm'); };
+$('formBack').onclick = () => { renderList(); show('viewList'); };
+
+$('fPhoto').addEventListener('change', () => {
+  const file = $('fPhoto').files[0];
+  $('ePhoto').textContent = '';
+  if (!file) { photoData = ''; $('preview').style.display = 'none'; return; }
+  if (!file.type.startsWith('image/')) { photoData = ''; $('preview').style.display = 'none'; $('ePhoto').textContent = '이미지 파일을 선택하세요'; return; }
+  if (file.size > 5 * 1024 * 1024) { photoData = ''; $('preview').style.display = 'none'; $('ePhoto').textContent = '5MB 이하 사진을 선택하세요'; return; }
+  const r = new FileReader();
+  r.onload = () => { photoData = r.result; $('preview').src = photoData; $('preview').style.display = 'block'; };
+  r.readAsDataURL(file);
+});
+
+const isPosInt = (s) => /^\d+$/.test(s.trim()) && Number(s) > 0;
+$('form').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const v = { Name: $('fName').value.trim(), Price: $('fPrice').value, Year: $('fYear').value, Mileage: $('fMileage').value };
+  const err = {};
+  if (!v.Name) err.Name = '차명을 입력하세요';
+  const maxYear = new Date().getFullYear() + 1;
+  if (!isPosInt(v.Price)) err.Price = '가격을 숫자로 입력하세요';
+  else if (Number(v.Price) > 99999) err.Price = '가격은 99,999만원 이하로 입력하세요';
+  if (!isPosInt(v.Year)) err.Year = '연식을 숫자로 입력하세요';
+  else if (Number(v.Year) < 1990 || Number(v.Year) > maxYear) err.Year = `연식은 1990~${maxYear} 사이로 입력하세요`;
+  if (!/^\d+$/.test(v.Mileage.trim())) err.Mileage = '주행거리를 숫자로 입력하세요';
+  if (!photoData) err.Photo = '사진을 선택하세요';
+  fields.forEach((f) => { $('e' + f).textContent = err[f] || ''; const i = $('f' + f); if (i) i.classList.toggle('invalid', !!err[f]); });
+  if (Object.keys(err).length) return;
+
+  cars.push({
+    id: nextId++, registeredAt: Math.max(...cars.map((c) => c.registeredAt)) + 1,
+    name: v.Name, price: Number(v.Price), year: Number(v.Year), mileage: Number(v.Mileage),
+    status: 'selling', photo: photoData,
+    spec: { 배기량: '정보 없음', 변속기: '정보 없음', 연비: '정보 없음', 색상: '정보 없음', 차종: '정보 없음' },
+    history: ['등록된 이력 없음'], options: [], contact: '연락처 미등록',
+  });
+  state.filter = 'all'; state.sort = 'latest'; // 새 매물이 맨 위에 보이도록 초기화
+  renderList(); show('viewList');
+});
+
+renderList();
+</script>
+</body>
+</html>
