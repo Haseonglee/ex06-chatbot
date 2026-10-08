@@ -1,0 +1,23 @@
+body { margin: 0; padding: 16px 20px; font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif; color: #1f2937; background: #f8fafc; }
+
+.app h1 { margin: 0 0 8px; font-size: 20px; }
+.moscow { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; font-size: 12px; }
+.moscow span { padding: 3px 8px; border-radius: 6px; background: #F1F5F9; }
+.moscow .must { background: #DCFCE7; } .moscow .should { background: #DBEAFE; } .moscow .could { background: #FEF3C7; } .moscow .wont { background: #F1F5F9; color: #64748B; text-decoration: line-through; }
+.form { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 12px; padding: 10px; border: 1px dashed #FDBA74; border-radius: 10px; background: #FFFBF5; }
+.form input { padding: 6px 8px; border: 1px solid #CBD5E1; border-radius: 6px; min-width: 0; flex: 1 1 140px; }
+.form button { padding: 6px 14px; border: 1px solid #EA580C; border-radius: 6px; background: #EA580C; color: #fff; cursor: pointer; }
+.msg { font-size: 13px; font-weight: 700; color: #9A3412; }
+.tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+.tab { padding: 6px 14px; border: 1px solid #CBD5E1; border-radius: 999px; background: #fff; cursor: pointer; }
+.tab.on { background: #1e293b; color: #fff; border-color: #1e293b; }
+.board { display: flex; flex-wrap: wrap; gap: 12px; }
+.card { display: flex; flex-direction: column; gap: 6px; width: 170px; padding: 14px; border-radius: 12px; background: #FFF7ED; border: 1px solid #FED7AA; }
+.card[data-status="assigned"] { background: #F0FDF4; border-color: #86EFAC; }
+.card[data-status="resolved"] { background: #F1F5F9; border-color: #CBD5E1; }
+.card h3 { margin: 0; font-size: 15px; }
+.card p { margin: 0; font-size: 12px; color: #9A3412; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; background: #DBEAFE; color: #1E40AF; font-weight: 700; }
+.card button { padding: 5px 10px; border: 1px solid #FB923C; border-radius: 8px; background: #fff; cursor: pointer; }
+.card button:disabled { border-color: #D1D5DB; color: #9CA3AF; cursor: default; }
+@media (max-width: 480px) { .card { width: 100%; } }
